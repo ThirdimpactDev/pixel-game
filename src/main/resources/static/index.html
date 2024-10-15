@@ -14,28 +14,40 @@
             stompClient.connect({}, function (frame) {
                 console.log('Connected: ' + frame);
                 stompClient.subscribe('/topic/public', function (message) {
-                    showMessage(JSON.parse(message.body));
+                    renderPixelOnGrid(JSON.parse(message.body));
                 });
             });
         }
 
+        // Sending pixel data (x, y, color) to the server
         function sendMessage() {
-            var pixelContent = document.getElementById("pixel").value;
-            if (pixelContent && stompClient) {
+            var x = document.getElementById("x").value;
+            var y = document.getElementById("y").value;
+            var color = document.getElementById("color").value;
+            if (x && y && color && stompClient) {
                 var pixel = {
-                    x: pixelContent
+                    x: parseInt(x),
+                    y: parseInt(y),
+                    color: parseInt(color)
                 };
-                console.log("enviando al server ...")
-                console.log(pixel)
-                stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(pixel));
-                document.getElementById("pixel").value = '';
+                console.log("Sending to server:", pixel);
+
+                console.log(stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(pixel)));
             }
         }
 
-        function showMessage(message) {
-            var messageElement = document.createElement('li');
-            messageElement.appendChild(document.createTextNode(message.sender + ": " + message.content));
-            document.getElementById('pixels').appendChild(messageElement);
+        // Function to render the pixel on a 10x10 grid
+        function renderPixelOnGrid(pixel) {
+            var gridElement = document.getElementById('grid');
+            var pixelElement = document.createElement('div');
+            pixelElement.style.width = '20px';
+            pixelElement.style.height = '20px';
+            pixelElement.style.backgroundColor = `#${pixel.color.toString(16)}`;
+            pixelElement.style.position = 'absolute';
+            pixelElement.style.left = `${pixel.x * 20}px`; // Adjust based on grid size
+            pixelElement.style.top = `${pixel.y * 20}px`;
+
+            gridElement.appendChild(pixelElement);
         }
 
         window.onload = function () {
@@ -45,11 +57,15 @@
 </head>
 
 <body>
-    <div>
-        <input type="text" id="pixel" placeholder="enter your pixel" />
-        <button onclick="sendMessage()">Send</button>
-    </div>
-    <ul id="pixels"></ul>
+<div>
+    <input type="number" id="x" placeholder="Enter x coordinate" />
+    <input type="number" id="y" placeholder="Enter y coordinate" />
+    <input type="number" id="color" placeholder="Enter color value" />
+    <button onclick="sendMessage()">Send</button>
+</div>
+<div id="grid" style="position: relative; width: 200px; height: 200px; border: 1px solid black;">
+    <!-- The 10x10 grid will render here -->
+</div>
 </body>
 
 </html>
