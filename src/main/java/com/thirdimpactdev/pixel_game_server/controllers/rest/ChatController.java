@@ -16,7 +16,6 @@ public class ChatController {
         return pixel;
     }
 
-    @SuppressWarnings("null")
     @MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     public Pixel addUser(Pixel pixel, SimpMessageHeaderAccessor headerAccessor) {
