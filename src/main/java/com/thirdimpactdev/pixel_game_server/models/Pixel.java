@@ -10,5 +10,7 @@ import lombok.NoArgsConstructor;
 public class Pixel {
 
     private int x;
-    
+    private int y;
+    private int color;
+
 }
