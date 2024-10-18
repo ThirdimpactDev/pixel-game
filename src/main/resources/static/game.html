@@ -32,7 +32,7 @@
                 };
                 console.log("Sending to server:", pixel);
 
-                console.log(stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(pixel)));
+                console.log(stompClient.send("/app/game.sendPixel", {}, JSON.stringify(pixel)));
             }
         }
 

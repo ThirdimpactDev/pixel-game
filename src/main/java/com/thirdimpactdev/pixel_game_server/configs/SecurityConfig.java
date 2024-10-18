@@ -12,7 +12,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/").permitAll();
+                    registry.requestMatchers("/","/game").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(form -> form
@@ -20,7 +20,7 @@ public class SecurityConfig {
                         .permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .defaultSuccessUrl("/home", true))
+                        .defaultSuccessUrl("/game.html", true))
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
                         .permitAll());
