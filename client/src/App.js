@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Login from './pages/Login.jsx'; // Cambia a Login.jsx
-import Home from './pages/Home'; // Asegúrate de tener un componente Home
+import Login from './pages/Login.jsx'; // Asegúrate de que la ruta sea correcta
+import Home from './pages/Home.jsx'; // Asegúrate de que la ruta sea correcta
 
 const App = () => {
   return (
@@ -15,3 +15,4 @@ const App = () => {
 };
 
 export default App;
+
