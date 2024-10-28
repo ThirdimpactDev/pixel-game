@@ -1,4 +1,41 @@
-/* From Uiverse.io by ayyjayy2 */ 
+/* Estilos del fondo animado */
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #e6f7ff; /* Un azul claro que combina con lightblue */
+  min-height: 100vh;
+}
+
+.pixel-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.pixel {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  opacity: 0.5;
+  animation: float 3s infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) translateX(0);
+  }
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+}
+
+/* Tus estilos originales sin modificar */
 .form {
   --input-focus: #2d8cf0;
   --font-color: #323232;
@@ -9,17 +46,17 @@
   background: lightblue;
   display: flex;
   flex-direction: column;
-  align-items: center;  /* Cambiado de flex-start a center */
+  align-items: center;
   justify-content: center;
   gap: 20px;
   border-radius: 5px;
   border: 2px solid var(--main-color);
   box-shadow: 4px 4px var(--main-color);
-  width: 300px;  /* Añadido */
-  position: absolute;  /* Añadido */
-  top: 50%;  /* Añadido */
-  left: 50%;  /* Añadido */
-  transform: translate(-50%, -50%);  /* Añadido */
+  width: 300px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .title {

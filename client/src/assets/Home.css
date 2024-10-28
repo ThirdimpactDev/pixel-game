@@ -1,0 +1,184 @@
+/* Estilos base */
+.star-background {
+  position: relative;
+  min-height: 100vh;
+  background-color: #0f172a;
+  overflow: hidden;
+}
+
+.stars-container {
+  position: absolute;
+  inset: 0;
+}
+
+.content {
+  position: relative;
+  z-index: 10;
+}
+
+.content h1 {
+  color: white;
+  font-size: 2.25rem;
+  font-weight: bold;
+  padding: 2rem;
+}
+
+/* Estilos de las estrellas estáticas */
+.stars-small {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  background-color: white;
+  animation: twinkle 3s infinite;
+  opacity: 0.7;
+}
+
+.stars-medium {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: white;
+  animation: twinkle-slow 4s infinite;
+  opacity: 0.9;
+}
+
+/* Estilos de las estrellas del mouse */
+.mouse-star {
+  position: absolute;
+  background-color: white;
+  pointer-events: none;
+}
+
+.star-small {
+  width: 1px;
+  height: 1px;
+}
+
+.star-medium {
+  width: 2px;
+  height: 2px;
+}
+
+.login-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #f59e0b;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  transform: translateY(1px);
+}
+
+.pixel-animation {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.login-button:hover .pixel-animation {
+  opacity: 1;
+}
+
+.pixel {
+  background-color: #b45309;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.login-button:hover .pixel {
+  animation: pixelate 0.4s steps(1) forwards;
+}
+
+/* Animación pixel por pixel */
+@keyframes pixelate {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(0.95);
+  }
+}
+
+/* Delays para los pixels en un patrón más ordenado desde la esquina */
+.pixel-animation .pixel:nth-child(1) { animation-delay: 0.05s; }
+.pixel-animation .pixel:nth-child(2) { animation-delay: 0.07s; }
+.pixel-animation .pixel:nth-child(3) { animation-delay: 0.09s; }
+.pixel-animation .pixel:nth-child(4) { animation-delay: 0.11s; }
+.pixel-animation .pixel:nth-child(5) { animation-delay: 0.13s; }
+.pixel-animation .pixel:nth-child(6) { animation-delay: 0.15s; }
+.pixel-animation .pixel:nth-child(7) { animation-delay: 0.17s; }
+.pixel-animation .pixel:nth-child(8) { animation-delay: 0.19s; }
+
+/* Animaciones existentes */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes twinkle-slow {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes floatUp1 {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-30px, -100px) rotate(-45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes floatUp2 {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(30px, -100px) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/* Variaciones de animación */
+.float-up-1 {
+  animation: floatUp1 1s forwards;
+}
+
+.float-up-2 {
+  animation: floatUp2 1s forwards;
+}
