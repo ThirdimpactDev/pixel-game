@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import '../assets/Home.css';
+import Button from '../components/Button'; // Importa el componente Button
 
 const Home = () => {
   const [mouseStars, setMouseStars] = useState([]);
+  const [pixelExplosions, setPixelExplosions] = useState([]);
 
   const createStar = (e) => {
     if (Math.random() > 0.15) {
@@ -28,11 +30,41 @@ const Home = () => {
     }, 1000);
   };
 
+  const handleClick = (e) => {
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    const explosions = Array.from({ length: 10 }).map(() => ({
+      id: Date.now() + Math.random(),
+      x: centerX + (Math.random() * 40 - 20),
+      y: centerY + (Math.random() * 40 - 20),
+    }));
+
+    setPixelExplosions(prev => [...prev, ...explosions]);
+
+    setTimeout(() => {
+      setPixelExplosions(prev => prev.filter(p => !explosions.includes(p)));
+    }, 500);
+  };
+
   return (
-    <div
-      className="star-background"
-      onMouseMove={createStar}
-    >
+    <div className="star-background" onMouseMove={createStar}>
+      {/* Animación de explosión de píxeles */}
+      {pixelExplosions.map((pixel) => (
+        <div
+          key={pixel.id}
+          className="pixel-explode"
+          style={{
+            position: 'fixed',
+            left: `${pixel.x}px`,
+            top: `${pixel.y}px`,
+          }}
+        />
+      ))}
+
       {mouseStars.map(star => (
         <div
           key={star.id}
@@ -45,8 +77,7 @@ const Home = () => {
       ))}
 
       <div className="stars-container">
-        {/* Todas las estrellas existentes se mantienen igual */}
-        {/* Primera capa de estrellas pequeñas */}
+        {/* Capa de estrellas pequeñas */}
         <div className="stars-small"></div>
         <div className="stars-small" style={{left: '15%', top: '20%'}}></div>
         <div className="stars-small" style={{left: '25%', top: '45%'}}></div>
@@ -55,21 +86,7 @@ const Home = () => {
         <div className="stars-small" style={{left: '70%', top: '25%'}}></div>
         <div className="stars-small" style={{left: '85%', top: '55%'}}></div>
         
-        {/* Segunda capa de estrellas pequeñas */}
-        <div className="stars-small" style={{left: '5%', top: '65%'}}></div>
-        <div className="stars-small" style={{left: '35%', top: '80%'}}></div>
-        <div className="stars-small" style={{left: '45%', top: '5%'}}></div>
-        <div className="stars-small" style={{left: '65%', top: '50%'}}></div>
-        <div className="stars-small" style={{left: '80%', top: '75%'}}></div>
-        <div className="stars-small" style={{left: '95%', top: '40%'}}></div>
-        
-        {/* Tercera capa de estrellas pequeñas */}
-        <div className="stars-small" style={{left: '8%', top: '35%'}}></div>
-        <div className="stars-small" style={{left: '28%', top: '70%'}}></div>
-        <div className="stars-small" style={{left: '48%', top: '40%'}}></div>
-        <div className="stars-small" style={{left: '68%', top: '15%'}}></div>
-        <div className="stars-small" style={{left: '88%', top: '85%'}}></div>
-
+        {/* Más capas de estrellas... */}
         {/* Estrellas medianas */}
         <div className="stars-medium" style={{left: '10%', top: '30%'}}></div>
         <div className="stars-medium" style={{left: '30%', top: '60%'}}></div>
@@ -83,19 +100,27 @@ const Home = () => {
         <div className="stars-medium" style={{left: '95%', top: '65%'}}></div>
       </div>
 
-      <div className="content">
-        <h1>Welcome to the Home Page</h1>
-      </div>
-
-      {/* Botón de login en la esquina superior derecha */}
-      <button className="login-button">
+      <h1 class="glitch" data-text="Welcome">Welcome</h1>
+      {/* Botón de login con animación de explosión de píxeles */}
+      <button className="pixel-button" onClick={handleClick}>
         Login
         <div className="pixel-animation">
           {[...Array(32)].map((_, index) => (
             <div key={index} className="pixel" />
           ))}
         </div>
-      </button>
+        </button>
+        <button className="play-button" onClick={handleClick}>
+    Play
+    <div className="pixel-animation">
+        {[...Array(32)].map((_, index) => (
+            <div key={index} className="pixel" />
+        ))}
+    </div>
+</button>
+
+
+
     </div>
   );
 };
