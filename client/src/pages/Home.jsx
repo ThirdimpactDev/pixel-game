@@ -5,6 +5,8 @@ import Button from '../components/Button'; // Importa el componente Button
 const Home = () => {
   const [mouseStars, setMouseStars] = useState([]);
   const [pixelExplosions, setPixelExplosions] = useState([]);
+  const audioUrl = "https://white-mariellen-36.tiiny.site/click_effect-86995.mp3";
+  const audio = new Audio(audioUrl);
 
   const createStar = (e) => {
     if (Math.random() > 0.15) {
@@ -31,9 +33,10 @@ const Home = () => {
   };
 
   const handleClick = (e) => {
+    audio.play(); // Reproduce el sonido al hacer clic
+
     const button = e.currentTarget;
     const rect = button.getBoundingClientRect();
-    
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     
@@ -100,7 +103,8 @@ const Home = () => {
         <div className="stars-medium" style={{left: '95%', top: '65%'}}></div>
       </div>
 
-      <h1 class="glitch" data-text="Welcome">Welcome</h1>
+      <h1 className="glitch" data-text="Welcome to Pixel Totsugeki!">Welcome to Pixel Totsugeki!</h1>
+      
       {/* Botón de login con animación de explosión de píxeles */}
       <button className="pixel-button" onClick={handleClick}>
         Login
@@ -109,18 +113,16 @@ const Home = () => {
             <div key={index} className="pixel" />
           ))}
         </div>
-        </button>
-        <button className="play-button" onClick={handleClick}>
-    Play
-    <div className="pixel-animation">
-        {[...Array(32)].map((_, index) => (
-            <div key={index} className="pixel" />
-        ))}
-    </div>
-</button>
-
-
-
+      </button>
+      
+      <button className="play-button" onClick={handleClick}>
+        Play
+        <div className="pixel-animation">
+          {[...Array(32)].map((_, index) => (
+              <div key={index} className="pixel" />
+          ))}
+        </div>
+      </button>
     </div>
   );
 };
