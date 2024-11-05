@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import RetroButton from './RetroButton';
 
 const RetroAudioButton = () => {
@@ -6,7 +6,7 @@ const RetroAudioButton = () => {
     const [volume, setVolume] = useState(0.5); // Valor inicial del volumen en 50%
     const audioRef = useRef(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         audioRef.current = new Audio('https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3');
         audioRef.current.loop = true;
         audioRef.current.volume = volume; // Establecer el volumen inicial
@@ -17,7 +17,7 @@ const RetroAudioButton = () => {
                 audioRef.current = null;
             }
         };
-    }, [volume]);
+    }, []);
 
     const handleClick = () => {
         if (audioRef.current) {
@@ -33,9 +33,7 @@ const RetroAudioButton = () => {
     const handleVolumeChange = (e) => {
         const newVolume = parseFloat(e.target.value);
         setVolume(newVolume);
-        if (audioRef.current) {
-            audioRef.current.volume = newVolume;
-        }
+        audioRef.current.volume = newVolume; // Actualizar el volumen del audio de forma instantánea
     };
 
     return (
