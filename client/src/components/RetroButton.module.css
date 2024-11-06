@@ -1,6 +1,9 @@
 .retroContainer {
-    position: relative;
+    position: fixed;
+    bottom: 20px; /* distancia desde la parte inferior */
+    right: 20px;  /* distancia desde la parte derecha */
     display: inline-block;
+    z-index: 1000; /* Asegúrate de que esté encima de otros elementos */
 }
 
 .retroPixel {
