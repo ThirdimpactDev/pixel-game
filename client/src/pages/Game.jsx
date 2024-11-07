@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import RetroAudioButton from '../components/RetroAudioButton';
 import RetroButton from '../components/RetroButton';
-import styles from '../components/Button.module.css';
+import buttonStyles from '../components/Button.module.css';
 
 const Game = () => {
   const rows = 30;
@@ -34,7 +34,7 @@ const Game = () => {
   };
 
   return (
-    <div style={{ position: 'relative', padding: '1rem' }}>
+    <div className={buttonStyles["custom-cursor"]} style={{ position: 'relative', padding: '1rem' }}>
       <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
         Expanded Game View
       </h1>
@@ -57,7 +57,6 @@ const Game = () => {
             style={{
               width: '1rem',
               height: '1rem',
-              cursor: 'pointer',
               backgroundColor: selectedSquares[index] || 'white',
               transition: 'background-color 0.15s',
             }}
@@ -66,13 +65,11 @@ const Game = () => {
       </div>
       
       <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-        {/* Botones de selección de color */}
         <button onClick={() => setSelectedColor('blue')} style={{ padding: '0.5rem 1rem', backgroundColor: 'blue', color: 'white' }}>Blue</button>
         <button onClick={() => setSelectedColor('red')} style={{ padding: '0.5rem 1rem', backgroundColor: 'red', color: 'white' }}>Red</button>
         <button onClick={() => setSelectedColor('green')} style={{ padding: '0.5rem 1rem', backgroundColor: 'green', color: 'white' }}>Green</button>
       </div>
 
-      {/* Contenedor para posicionar el botón */}
       <div style={{ position: 'absolute', bottom: '1rem', right: '1rem' }}>
         <RetroButton onClick={() => console.log('Start Game clicked!')}>
           Start Game
