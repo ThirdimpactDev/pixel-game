@@ -18,11 +18,12 @@ public class SecurityConfig {
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(form -> form
-                        .loginPage("/login")
+                       //.loginPage("/login")
+                        .loginPage("http://localhost:5173/login")
                         .permitAll())
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .defaultSuccessUrl("/game.html", true))
+                        .defaultSuccessUrl("/home.html", true))
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
                         .permitAll());
