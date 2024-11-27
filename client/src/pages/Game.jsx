@@ -5,127 +5,124 @@ import RetroButton from '../components/RetroButton';
 import buttonStyles from '../components/Button.module.css';
 
 const Game = () => {
-   const rows = 30;
-   const cols = 40;
-   const totalSquares = rows * cols;
+  const [colors, setColors] = useState([]);
+  const [currentColor, setCurrentColor] = useState(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  
+  // Matriz inicial con el patrón de números
+  const initialMatrix = [
+    [3, 1, 2, 3, 4, 5, 6, 7, 8, 0],
+    [1, 2, 3, 4, 5, 6, 7, 8, 0, 1],
+    [2, 3, 4, 5, 6, 7, 8, 0, 1, 2],
+    [3, 4, 5, 6, 7, 8, 0, 1, 2, 3],
+    [4, 5, 6, 7, 8, 0, 1, 2, 3, 4],
+    [5, 6, 7, 8, 0, 1, 2, 3, 4, 5],
+    [6, 7, 8, 0, 1, 2, 3, 4, 5, 6],
+    [7, 8, 0, 1, 2, 3, 4, 5, 6, 7],
+    [8, 0, 1, 2, 3, 4, 5, 6, 7, 8],
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 0]
+  ];
 
-   const [colors, setColors] = useState([]);
-   const [selectedSquares, setSelectedSquares] = useState({});
-   const [isDrawing, setIsDrawing] = useState(false);
+  const [matrix, setMatrix] = useState(initialMatrix);
 
-   // Fetch colors from backend on component mount
-   useEffect(() => {
-     const fetchColors = async () => {
-       try {
-         console.log('Intentando traer colores');
-         const response = await axios.get('http://localhost:8080/color');
-         console.log('Respuesta del backend:', response.data);
-         
-         // Convierte los códigos de color a valores de color con #
-         const colorValues = Object.entries(response.data).map(([key, colorCode]) => `#${colorCode}`);
-         console.log('Colores convertidos:', colorValues);
-         
-         setColors(colorValues);
-       } catch (error) {
-         console.error('Error fetching colors:', error);
-         // Fallback to default colors if fetch fails
-         setColors(['#E34234', '#26619C', '#50C878', '#800080', '#FFD700']);
-       }
-     };
+  useEffect(() => {
+    const fetchColors = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/color');
+        // Ahora guardamos el objeto completo con los códigos de color
+        const colorArray = Object.values(response.data).map(code => `#${code}`);
+        setColors(colorArray);
+        setCurrentColor(colorArray[0]);
+      } catch (error) {
+        console.error('Error fetching colors:', error);
+        // Ya no necesitamos colores por defecto ya que siempre usaremos los del backend
+      }
+    };
 
-     fetchColors();
-   }, []);
+    fetchColors();
+  }, []);
 
-   const handleSquareClick = (id, event) => {
-     setSelectedSquares((prev) => {
-       const currentColor = prev[id];
-       let newColor;
-       
-       if (event.ctrlKey) {
-         // Cycle through colors if Ctrl is pressed
-         const currentIndex = colors.indexOf(currentColor);
-         newColor = colors[(currentIndex + 1) % colors.length];
-       } else {
-         // Toggle color on normal click
-         newColor = currentColor ? null : colors[0];
-       }
-       
-       return {
-         ...prev,
-         [id]: newColor,
-       };
-     });
-   };
+  const getColorFromNumber = (number) => {
+    // Si aún no tenemos colores del backend, retornamos un color neutral
+    if (colors.length === 0) return '#ffffff';
+    return colors[number] || '';
+  };
 
-   const handleMouseDown = (id, event) => {
-     setIsDrawing(true);
-     handleSquareClick(id, event);
-   };
+  const handleClick = (rowIndex, colIndex) => {
+    const newMatrix = [...matrix];
+    const currentValue = matrix[rowIndex][colIndex];
+    // Asegurémonos de que el número no exceda la cantidad de colores disponibles
+    newMatrix[rowIndex][colIndex] = (currentValue + 1) % colors.length;
+    setMatrix(newMatrix);
+  };
 
-   const handleMouseEnter = (id, event) => {
-     if (isDrawing) {
-       handleSquareClick(id, event);
-     }
-   };
+  const handleMouseDown = (rowIndex, colIndex) => {
+    setIsDrawing(true);
+    handleClick(rowIndex, colIndex);
+  };
 
-   const handleMouseUp = () => {
-     setIsDrawing(false);
-   };
+  const handleMouseMove = (rowIndex, colIndex) => {
+    if (isDrawing) {
+      handleClick(rowIndex, colIndex);
+    }
+  };
 
-   return (
-     <div className={buttonStyles["custom-cursor"]} style={{ position: 'relative', padding: '1rem' }}>
-       <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
-         Expanded Game View
-       </h1>
-       
-       <div
-         style={{
-           display: 'flex',
-           justifyContent: 'center',
-           alignItems: 'center',
-           height: '80vh',
-         }}
-       >
-         <div
-           style={{
-             display: 'grid',
-             width: 'fit-content',
-             outline: '1px solid #9CA3AF',
-             gridTemplateColumns: `repeat(${cols}, 1fr)`,
-             gridTemplateRows: `repeat(${rows}, 1fr)`,
-             gridGap: '1px',
-           }}
-         >
-           {[...Array(totalSquares)].map((_, index) => (
-             <div
-               key={index}
-               onMouseDown={(event) => handleMouseDown(index, event)}
-               onMouseEnter={(event) => handleMouseEnter(index, event)}
-               onMouseUp={handleMouseUp}
-               style={{
-                 width: '1rem',
-                 height: '1rem',
-                 backgroundColor: selectedSquares[index] || 'white',
-                 transition: 'background-color 0.15s',
-               }}
-             />
-           ))}
-         </div>
-       </div>
+  const handleMouseUp = () => {
+    setIsDrawing(false);
+  };
 
-       <div style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
-         <p>Tip: Hold Ctrl and click on a square to cycle through colors.</p>
-       </div>
+  return (
+    <div className={buttonStyles["custom-cursor"]} style={{ position: 'relative', padding: '1rem' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+        Expanded Game View
+      </h1>
+      
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${matrix[0].length}, 1fr)`,
+            gridTemplateRows: `repeat(${matrix.length}, 1fr)`,
+            gap: '1px',
+            height: '500px',
+            width: '600px',
+            backgroundColor: '#9CA3AF',
+            padding: '1px'
+          }}
+        >
+          {matrix.map((row, rowIndex) => 
+            row.map((cell, colIndex) => (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                style={{
+                  backgroundColor: getColorFromNumber(cell),
+                  width: '100%',
+                  height: '100%',
+                  cursor: 'pointer'
+                }}
+                onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+                onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              />
+            ))
+          )}
+        </div>
+      </div>
 
-       <div style={{ position: 'center', bottom: '1rem', right: '1rem' }}>
-         <RetroButton onClick={() => console.log('Start Game clicked!')}>
-           Start Game
-         </RetroButton>
-       </div>
+      <div style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
+        <p>Click on cells to change their colors in sequence.</p>
+      </div>
 
-       <RetroAudioButton />
-     </div>
-   );
+      <div style={{ position: 'center', bottom: '1rem', right: '1rem' }}>
+        <RetroButton onClick={() => setMatrix(initialMatrix)}>
+          Reset Grid
+        </RetroButton>
+      </div>
+
+      <RetroAudioButton />
+    </div>
+  );
 };
 
 export default Game;
