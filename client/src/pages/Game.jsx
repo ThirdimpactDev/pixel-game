@@ -8,8 +8,10 @@ const Game = () => {
   const [colors, setColors] = useState([]);
   const [currentColor, setCurrentColor] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
+  const [selectedCell, setSelectedCell] = useState(null);
   
-  // Matriz inicial con el patrón de números
   const initialMatrix = [
     [3, 1, 2, 3, 4, 5, 6, 7, 8, 0],
     [1, 2, 3, 4, 5, 6, 7, 8, 0, 1],
@@ -29,13 +31,11 @@ const Game = () => {
     const fetchColors = async () => {
       try {
         const response = await axios.get('http://localhost:8080/color');
-        // Ahora guardamos el objeto completo con los códigos de color
         const colorArray = Object.values(response.data).map(code => `#${code}`);
         setColors(colorArray);
         setCurrentColor(colorArray[0]);
       } catch (error) {
         console.error('Error fetching colors:', error);
-        // Ya no necesitamos colores por defecto ya que siempre usaremos los del backend
       }
     };
 
@@ -43,33 +43,62 @@ const Game = () => {
   }, []);
 
   const getColorFromNumber = (number) => {
-    // Si aún no tenemos colores del backend, retornamos un color neutral
     if (colors.length === 0) return '#ffffff';
     return colors[number] || '';
   };
 
-  const handleClick = (rowIndex, colIndex) => {
-    const newMatrix = [...matrix];
-    const currentValue = matrix[rowIndex][colIndex];
-    // Asegurémonos de que el número no exceda la cantidad de colores disponibles
-    newMatrix[rowIndex][colIndex] = (currentValue + 1) % colors.length;
-    setMatrix(newMatrix);
+  const handleCellClick = (event, rowIndex, colIndex) => {
+    // Store click position for color picker menu
+    setClickPosition({
+      x: event.clientX,
+      y: event.clientY
+    });
+    setSelectedCell({ rowIndex, colIndex });
+    setShowColorPicker(true);
   };
 
-  const handleMouseDown = (rowIndex, colIndex) => {
-    setIsDrawing(true);
-    handleClick(rowIndex, colIndex);
-  };
-
-  const handleMouseMove = (rowIndex, colIndex) => {
-    if (isDrawing) {
-      handleClick(rowIndex, colIndex);
+  const handleColorSelect = (colorIndex) => {
+    if (selectedCell) {
+      const newMatrix = [...matrix];
+      newMatrix[selectedCell.rowIndex][selectedCell.colIndex] = colorIndex;
+      setMatrix(newMatrix);
     }
+    setShowColorPicker(false);
+    setSelectedCell(null);
   };
 
-  const handleMouseUp = () => {
-    setIsDrawing(false);
-  };
+  const ColorPickerMenu = () => (
+    <div
+      style={{
+        position: 'fixed',
+        left: clickPosition.x,
+        top: clickPosition.y,
+        backgroundColor: 'white',
+        border: '1px solid #ccc',
+        borderRadius: '4px',
+        padding: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+        zIndex: 1000,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: '4px'
+      }}
+    >
+      {colors.map((color, index) => (
+        <div
+          key={index}
+          onClick={() => handleColorSelect(index)}
+          style={{
+            width: '20px',
+            height: '20px',
+            backgroundColor: color,
+            cursor: 'pointer',
+            border: '1px solid #ccc'
+          }}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div className={buttonStyles["custom-cursor"]} style={{ position: 'relative', padding: '1rem' }}>
@@ -100,18 +129,17 @@ const Game = () => {
                   height: '100%',
                   cursor: 'pointer'
                 }}
-                onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
-                onMouseMove={() => handleMouseMove(rowIndex, colIndex)}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
+                onClick={(e) => handleCellClick(e, rowIndex, colIndex)}
               />
             ))
           )}
         </div>
       </div>
 
+      {showColorPicker && <ColorPickerMenu />}
+
       <div style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
-        <p>Click on cells to change their colors in sequence.</p>
+        <p>Click on cells to select a new color.</p>
       </div>
 
       <div style={{ position: 'center', bottom: '1rem', right: '1rem' }}>
