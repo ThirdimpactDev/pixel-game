@@ -18,6 +18,7 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/home")
     public String home(@AuthenticationPrincipal OAuth2User principal, Model model) {
+        System.out.println(principal);
         String username = principal.getAttribute("name");
         model.addAttribute("username", username);
         return "home";
