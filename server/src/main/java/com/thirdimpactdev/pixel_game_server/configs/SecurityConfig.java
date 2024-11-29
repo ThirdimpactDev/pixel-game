@@ -24,6 +24,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(registry -> {
                     registry.requestMatchers("/").permitAll();
                     registry.requestMatchers("/ws/**").permitAll();
+                    registry.requestMatchers("/colors").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .formLogin(form -> form
