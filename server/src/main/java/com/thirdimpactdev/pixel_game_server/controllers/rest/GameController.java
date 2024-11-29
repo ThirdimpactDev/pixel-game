@@ -18,7 +18,6 @@ public class GameController {
     @MessageMapping("/game.sendPixel")
     @SendTo("/topic/grid")
     public int[][] getGrid(@Payload Pixel pixel) {
-        System.out.println("pixel recibido por backend : " + pixel);
         grid.setGrid(pixel);
         return grid.getGrid();
     }
@@ -26,7 +25,6 @@ public class GameController {
     @MessageMapping("/game.subscribeGrid")
     @SendTo("/topic/grid")
     public int[][] subscribeToGrid() {
-        System.out.println("Cliente suscrito. Enviando el estado actual del grid.");
         return grid.getGrid();
     }
 
