@@ -2,8 +2,10 @@ package com.thirdimpactdev.pixel_game_server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @SpringBootApplication
+@EnableWebSecurity
 public class PixelGameServerApplication {
 
 	public static void main(String[] args) {
