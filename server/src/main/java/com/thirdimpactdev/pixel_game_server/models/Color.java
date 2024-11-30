@@ -8,6 +8,7 @@ import java.util.Map;
 @Component
 public class Color {
     private Map<String, String> colorList = Map.of(
+            "0", "FFFFFF", // white
             "1", "E34234", // red
             "2", "26619C", // blue
             "3", "50C878", // green

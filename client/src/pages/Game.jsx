@@ -3,6 +3,8 @@ import axios from 'axios';
 import RetroAudioButton from '../components/RetroAudioButton';
 import RetroButton from '../components/RetroButton';
 import buttonStyles from '../components/Button.module.css';
+import { Stomp } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 
 const Game = () => {
   const [colors, setColors] = useState([]);
@@ -11,6 +13,8 @@ const Game = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const [selectedCell, setSelectedCell] = useState(null);
+  const [grid, setGrid] = useState([]);
+
   
   const initialMatrix = [
     [3, 1, 2, 3, 4, 5, 6, 7, 8, 0],
@@ -28,12 +32,40 @@ const Game = () => {
   const [matrix, setMatrix] = useState(initialMatrix);
 
   useEffect(() => {
+    const socket = new SockJS("http://localhost:8080/ws");
+    const client = Stomp.over(socket);
+
+    client.connect(
+      {},
+      () => {
+        console.log("Conectando a /topic/grid del backend");
+
+        client.subscribe("/topic/grid", (message) => {
+          console.log("Grid recibido:", JSON.parse(message.body));
+          setGrid(JSON.parse(message.body));
+        });
+
+        client.send("/app/game.subscribeGrid", {}, JSON.stringify({}));
+      },
+      (error) => {
+        console.error("Error en la conexión WebSocket", error);
+      }
+    );
+
+    // return () => {
+    //   client.disconnect(() => {
+    //     console.log("Conexión WebSocket desconectada");
+    //   });
+    // };
+
     const fetchColors = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/color');
+        const response = await axios.get('http://localhost:8080/colors');
         const colorArray = Object.values(response.data).map(code => `#${code}`);
         setColors(colorArray);
         setCurrentColor(colorArray[0]);
+        console.log("################## COLORS #########################")
+        console.log(response.data)
       } catch (error) {
         console.error('Error fetching colors:', error);
       }
@@ -106,51 +138,52 @@ const Game = () => {
         Expanded Game View
       </h1>
       
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+      <div style={{ background: 'red', height: '500px', width: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${matrix[0].length}, 1fr)`,
-            gridTemplateRows: `repeat(${matrix.length}, 1fr)`,
-            gap: '1px',
-            height: '500px',
-            width: '600px',
-            backgroundColor: '#9CA3AF',
-            padding: '1px'
+            gridTemplateColumns: `repeat(${grid.length}, 1fr)`,
+            gridTemplateRows: `repeat(${grid[0]?.length}, 1fr)`,  // Ensure grid[0] is not undefined
+            width: '100%',
+            height: '100%',
           }}
         >
-          {matrix.map((row, rowIndex) => 
-            row.map((cell, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                style={{
-                  backgroundColor: getColorFromNumber(cell),
-                  width: '100%',
-                  height: '100%',
-                  cursor: 'pointer'
-                }}
-                onClick={(e) => handleCellClick(e, rowIndex, colIndex)}
-              />
-            ))
-          )}
+          {
+            grid.map((row, rowIndex) => 
+              row.map((cell, colIndex) => (
+                <div
+                  key={`${rowIndex}-${colIndex}`}
+                  style={{
+                    backgroundColor: getColorFromNumber(cell), // Get color based on cell value
+                    cursor: 'pointer',
+                    width: '100%', // Adjust size as needed
+                    height: '100%', // Adjust size as needed
+                  }}
+                  onClick={(e) => handleCellClick(e, rowIndex, colIndex)} // Handle color selection on click
+                />
+              ))
+            )
+          }
         </div>
       </div>
-
+  
       {showColorPicker && <ColorPickerMenu />}
-
+  
       <div style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
         <p>Click on cells to select a new color.</p>
       </div>
-
+  
       <div style={{ position: 'center', bottom: '1rem', right: '1rem' }}>
         <RetroButton onClick={() => setMatrix(initialMatrix)}>
           Reset Grid
         </RetroButton>
       </div>
-
+  
       <RetroAudioButton />
     </div>
   );
+
+  
 };
 
 export default Game;
