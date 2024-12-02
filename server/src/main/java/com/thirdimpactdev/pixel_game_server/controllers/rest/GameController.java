@@ -21,6 +21,7 @@ public class GameController {
     @SendTo("/topic/grid")
     public int[][] getGrid(@Payload Pixel pixel) {
         grid.setGrid(pixel);
+        System.out.println(pixel);
         return grid.getGrid();
     }
 

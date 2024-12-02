@@ -8,28 +8,11 @@ import SockJS from "sockjs-client";
 
 const Game = () => {
   const [colors, setColors] = useState([]);
-  const [currentColor, setCurrentColor] = useState(null);
-  const [isDrawing, setIsDrawing] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const [selectedCell, setSelectedCell] = useState(null);
   const [grid, setGrid] = useState([]);
   const [stompClient, setStompClient] = useState(null);
-
-  const initialMatrix = [
-    [3, 1, 2, 3, 4, 5, 6, 7, 8, 0],
-    [1, 2, 3, 4, 5, 6, 7, 8, 0, 1],
-    [2, 3, 4, 5, 6, 7, 8, 0, 1, 2],
-    [3, 4, 5, 6, 7, 8, 0, 1, 2, 3],
-    [4, 5, 6, 7, 8, 0, 1, 2, 3, 4],
-    [5, 6, 7, 8, 0, 1, 2, 3, 4, 5],
-    [6, 7, 8, 0, 1, 2, 3, 4, 5, 6],
-    [7, 8, 0, 1, 2, 3, 4, 5, 6, 7],
-    [8, 0, 1, 2, 3, 4, 5, 6, 7, 8],
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 0]
-  ];
-
-  const [matrix, setMatrix] = useState(initialMatrix);
 
   useEffect(() => {
     const socket = new SockJS("http://localhost:8080/ws");
@@ -51,9 +34,7 @@ const Game = () => {
         const response = await axios.get('http://localhost:8080/colors');
         const colorArray = Object.values(response.data).map(code => `#${code}`);
         setColors(colorArray);
-        setCurrentColor(colorArray[0]);
-        console.log("################## COLORS #########################")
-        console.log(response.data)
+        console.log("Colors loaded:", colorArray);
       } catch (error) {
         console.error('Error fetching colors:', error);
       }
@@ -68,33 +49,41 @@ const Game = () => {
   };
 
   const handleCellClick = (event, rowIndex, colIndex) => {
-    event.preventDefault();
-    // Store click position for color picker menu
+    // Obtener la posición del elemento que contiene la cuadrícula
+    const gridElement = event.currentTarget.parentElement;
+    const gridRect = gridElement.getBoundingClientRect();
+    
+    // Calcular la posición relativa del clic dentro de la cuadrícula
+    const cellWidth = gridRect.width / grid[0].length;
+    const cellHeight = gridRect.height / grid.length;
+    
+    // Calcular la posición exacta del clic
+    const x = Math.floor((event.clientX - gridRect.left) / cellWidth);
+    const y = Math.floor((event.clientY - gridRect.top) / cellHeight);
+
     setClickPosition({
       x: event.clientX,
       y: event.clientY
     });
-    // Store the selected cell coordinates
+    
     setSelectedCell({
-      row: rowIndex,
-      column: colIndex
+      row: x,
+      col: y
     });
+    
     setShowColorPicker(true);
   };
 
   const handleColorSelect = (colorIndex) => {
     if (selectedCell && stompClient) {
       const payload = {
-        row: selectedCell.row,
-        column: selectedCell.column,
+        x: selectedCell.col,
+        y: selectedCell.row,
         color: colorIndex
       };
+      
       console.log('Sending pixel update:', payload);
-      stompClient.send(
-        "/app/game.sendPixel", 
-        {}, 
-        JSON.stringify(payload)
-      );
+      stompClient.send("/app/game.sendPixel", {}, JSON.stringify(payload));
     }
     setShowColorPicker(false);
     setSelectedCell(null);
@@ -143,8 +132,8 @@ const Game = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${grid.length}, 1fr)`,
-            gridTemplateRows: `repeat(${grid[0]?.length}, 1fr)`,
+            gridTemplateColumns: `repeat(${grid.length || 10}, 1fr)`,
+            gridTemplateRows: `repeat(${grid[0]?.length || 10}, 1fr)`,
             width: '100%',
             height: '100%',
           }}
@@ -173,7 +162,7 @@ const Game = () => {
       </div>
 
       <div style={{ position: 'center', bottom: '1rem', right: '1rem' }}>
-        <RetroButton onClick={() => setMatrix(initialMatrix)}>
+        <RetroButton onClick={() => setGrid(Array(10).fill(Array(10).fill(0)))}>
           Reset Grid
         </RetroButton>
       </div>

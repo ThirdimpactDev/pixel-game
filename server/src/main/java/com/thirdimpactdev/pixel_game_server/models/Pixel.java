@@ -7,6 +7,7 @@ import lombok.ToString;
 
 @Data
 @AllArgsConstructor
+@ToString
 @NoArgsConstructor
 public class Pixel {
 
