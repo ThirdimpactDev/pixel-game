@@ -23,8 +23,18 @@ public class AuthController {
 
 
     @GetMapping("/login")
-    public Map<String, String> login(@AuthenticationPrincipal OAuth2User principal) {
+    public String login(@AuthenticationPrincipal OAuth2User principal) {
+        return "login.html";
+    }
+
+    @GetMapping("/token.grant")
+    public Map<String, String> tokenGrant(@AuthenticationPrincipal OAuth2User principal) {
         return jwtService.getToken(principal);
+    }
+
+    @GetMapping("/home")
+    public String testHome(){
+        return "home";
     }
 
 
