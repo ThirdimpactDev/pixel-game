@@ -14,8 +14,8 @@ const Game = () => {
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const [selectedCell, setSelectedCell] = useState(null);
   const [grid, setGrid] = useState([]);
+  const [stompClient, setStompClient] = useState(null);
 
-  
   const initialMatrix = [
     [3, 1, 2, 3, 4, 5, 6, 7, 8, 0],
     [1, 2, 3, 4, 5, 6, 7, 8, 0, 1],
@@ -38,25 +38,13 @@ const Game = () => {
     client.connect(
       {},
       () => {
-        console.log("Conectando a /topic/grid del backend");
-
+        setStompClient(client);
         client.subscribe("/topic/grid", (message) => {
-          console.log("Grid recibido:", JSON.parse(message.body));
           setGrid(JSON.parse(message.body));
         });
-
         client.send("/app/game.subscribeGrid", {}, JSON.stringify({}));
-      },
-      (error) => {
-        console.error("Error en la conexión WebSocket", error);
       }
     );
-
-    // return () => {
-    //   client.disconnect(() => {
-    //     console.log("Conexión WebSocket desconectada");
-    //   });
-    // };
 
     const fetchColors = async () => {
       try {
@@ -80,20 +68,33 @@ const Game = () => {
   };
 
   const handleCellClick = (event, rowIndex, colIndex) => {
+    event.preventDefault();
     // Store click position for color picker menu
     setClickPosition({
       x: event.clientX,
       y: event.clientY
     });
-    setSelectedCell({ rowIndex, colIndex });
+    // Store the selected cell coordinates
+    setSelectedCell({
+      row: rowIndex,
+      column: colIndex
+    });
     setShowColorPicker(true);
   };
 
   const handleColorSelect = (colorIndex) => {
-    if (selectedCell) {
-      const newMatrix = [...matrix];
-      newMatrix[selectedCell.rowIndex][selectedCell.colIndex] = colorIndex;
-      setMatrix(newMatrix);
+    if (selectedCell && stompClient) {
+      const payload = {
+        row: selectedCell.row,
+        column: selectedCell.column,
+        color: colorIndex
+      };
+      console.log('Sending pixel update:', payload);
+      stompClient.send(
+        "/app/game.sendPixel", 
+        {}, 
+        JSON.stringify(payload)
+      );
     }
     setShowColorPicker(false);
     setSelectedCell(null);
@@ -143,47 +144,43 @@ const Game = () => {
           style={{
             display: 'grid',
             gridTemplateColumns: `repeat(${grid.length}, 1fr)`,
-            gridTemplateRows: `repeat(${grid[0]?.length}, 1fr)`,  // Ensure grid[0] is not undefined
+            gridTemplateRows: `repeat(${grid[0]?.length}, 1fr)`,
             width: '100%',
             height: '100%',
           }}
         >
-          {
-            grid.map((row, rowIndex) => 
-              row.map((cell, colIndex) => (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  style={{
-                    backgroundColor: getColorFromNumber(cell), // Get color based on cell value
-                    cursor: 'pointer',
-                    width: '100%', // Adjust size as needed
-                    height: '100%', // Adjust size as needed
-                  }}
-                  onClick={(e) => handleCellClick(e, rowIndex, colIndex)} // Handle color selection on click
-                />
-              ))
-            )
-          }
+          {grid.map((row, rowIndex) => 
+            row.map((cell, colIndex) => (
+              <div
+                key={`${rowIndex}-${colIndex}`}
+                style={{
+                  backgroundColor: getColorFromNumber(cell),
+                  cursor: 'pointer',
+                  width: '100%',
+                  height: '100%',
+                }}
+                onClick={(e) => handleCellClick(e, rowIndex, colIndex)}
+              />
+            ))
+          )}
         </div>
       </div>
-  
+
       {showColorPicker && <ColorPickerMenu />}
-  
+
       <div style={{ marginTop: '1rem', fontSize: '0.9rem' }}>
         <p>Click on cells to select a new color.</p>
       </div>
-  
+
       <div style={{ position: 'center', bottom: '1rem', right: '1rem' }}>
         <RetroButton onClick={() => setMatrix(initialMatrix)}>
           Reset Grid
         </RetroButton>
       </div>
-  
+
       <RetroAudioButton />
     </div>
   );
-
-  
 };
 
 export default Game;
