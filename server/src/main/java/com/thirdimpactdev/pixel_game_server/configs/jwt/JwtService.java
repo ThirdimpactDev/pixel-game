@@ -1,7 +1,12 @@
 package com.thirdimpactdev.pixel_game_server.configs.jwt;
 
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -9,7 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.crypto.SecretKey;
+import java.security.Key;
 import java.security.Principal;
+import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +43,8 @@ public class JwtService {
 
         // Generate JWT
         String token = jwtUtil.generateToken(email, claims);
+        // Token Validation
+
 
         // Return token and user information
         Map<String, String> response = new HashMap<>();
@@ -44,5 +55,8 @@ public class JwtService {
         System.out.println("response = " + response);
         return response;
     }
+
+
+
 
 }

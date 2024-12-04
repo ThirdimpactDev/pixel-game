@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 
 import com.thirdimpactdev.pixel_game_server.models.Grid;
 import com.thirdimpactdev.pixel_game_server.models.Pixel;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class GameController {
@@ -30,6 +31,12 @@ public class GameController {
     @SendTo("/topic/grid")
     public int[][] subscribeToGrid() {
         return grid.getGrid();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/test")
+    public String test(){
+        return "Oeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee!";
     }
 
 }

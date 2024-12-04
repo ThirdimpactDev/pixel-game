@@ -9,28 +9,32 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
-@Controller
+@RestController
 public class AuthController {
 
 
     @Autowired
     JwtService jwtService;
 
-
-    @GetMapping("/login")
-    public String login(@AuthenticationPrincipal OAuth2User principal) {
-        return "login.html";
-    }
+//
+//    @GetMapping("/login")
+//    public String login(@AuthenticationPrincipal OAuth2User principal) {
+//        return "logueo";
+//    }
 
     @GetMapping("/token.grant")
-    public Map<String, String> tokenGrant(@AuthenticationPrincipal OAuth2User principal) {
-        return jwtService.getToken(principal);
+    public String tokenGrant(@AuthenticationPrincipal OAuth2User principal) {
+        Map<String,String> response=jwtService.getToken(principal);
+        System.out.println(response.get("token"));
+        return "home";
     }
+
 
     @GetMapping("/home")
     public String testHome(){

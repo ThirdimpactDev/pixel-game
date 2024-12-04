@@ -22,7 +22,7 @@ public class JwtUtil {
 
     @Value("${secret.key}")
     private String secretKey;
-    private static final long EXPIRATION_TIME = 3600000; // 1 hour in milliseconds
+    private static final long EXPIRATION_TIME = 1000*30; // 1 hour in milliseconds
 
     public String generateToken(String subject, Map<String, Object> claims) {
         System.out.println(secretKey);
