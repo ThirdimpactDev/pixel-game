@@ -50,8 +50,8 @@ const Home = () => {
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const explosions = Array.from({ length: 10 }).map(() => ({
-      id: Date.now() + Math.random(),
+    const explosions = Array.from({ length: 10 }).map((_, index) => ({
+      id: `${Date.now()}-${Math.random()}-${index}`,
       x: centerX + (Math.random() * 40 - 20),
       y: centerY + (Math.random() * 40 - 20),
     }));
@@ -88,26 +88,21 @@ const Home = () => {
         />
       ))}
 
-      <div className="stars-container">
-        <div className="stars-small"></div>
-        <div className="stars-small" style={{left: '15%', top: '20%'}}></div>
-        <div className="stars-small" style={{left: '25%', top: '45%'}}></div>
-        <div className="stars-small" style={{left: '40%', top: '15%'}}></div>
-        <div className="stars-small" style={{left: '55%', top: '35%'}}></div>
-        <div className="stars-small" style={{left: '70%', top: '25%'}}></div>
-        <div className="stars-small" style={{left: '85%', top: '55%'}}></div>
+<div className="stars-container">
+  {[...Array(7)].map((_, i) => (
+    <div key={`small-star-${i}`} className="stars-small" style={{
+      left: `${15 + i * 15}%`,
+      top: `${20 + (i % 3) * 15}%`
+    }}></div>
+  ))}
 
-        <div className="stars-medium" style={{left: '10%', top: '30%'}}></div>
-        <div className="stars-medium" style={{left: '30%', top: '60%'}}></div>
-        <div className="stars-medium" style={{left: '50%', top: '25%'}}></div>
-        <div className="stars-medium" style={{left: '75%', top: '45%'}}></div>
-        <div className="stars-medium" style={{left: '90%', top: '15%'}}></div>
-        <div className="stars-medium" style={{left: '20%', top: '85%'}}></div>
-        <div className="stars-medium" style={{left: '40%', top: '55%'}}></div>
-        <div className="stars-medium" style={{left: '60%', top: '75%'}}></div>
-        <div className="stars-medium" style={{left: '80%', top: '5%'}}></div>
-        <div className="stars-medium" style={{left: '95%', top: '65%'}}></div>
-      </div>
+  {[...Array(10)].map((_, i) => (
+    <div key={`medium-star-${i}`} className="stars-medium" style={{
+      left: `${10 + i * 10}%`,
+      top: `${(30 + i * 5) % 85}%`
+    }}></div>
+  ))}
+</div>
 
       <h1 className="glitch" data-text="Welcome to Pixel Totsugeki!">Welcome to Pixel Totsugeki!</h1>
       

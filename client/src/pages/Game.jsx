@@ -1,92 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import websocketService from '../service/websocketService';
 import RetroAudioButton from '../components/RetroAudioButton';
 import RetroButton from '../components/RetroButton';
 import buttonStyles from '../components/Button.module.css';
-import { Stomp } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
+
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:8080'
+});
+
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('jwt_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 const Game = () => {
+  const [grid, setGrid] = useState(Array(10).fill(Array(10).fill(0)));
   const [colors, setColors] = useState([]);
+  const [selectedCell, setSelectedCell] = useState(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
-  const [selectedCell, setSelectedCell] = useState(null);
-  const [grid, setGrid] = useState([]);
-  const [stompClient, setStompClient] = useState(null);
 
   useEffect(() => {
-    const socket = new SockJS("http://localhost:8080/ws");
-    const client = Stomp.over(socket);
-
-    client.connect(
-      {},
-      () => {
-        setStompClient(client);
-        client.subscribe("/topic/grid", (message) => {
-          setGrid(JSON.parse(message.body));
+    websocketService.connect()
+      .then(() => {
+        websocketService.subscribe('/topic/grid', (message) => {
+          setGrid(message);
         });
-        client.send("/app/game.subscribeGrid", {}, JSON.stringify({}));
-      }
-    );
+      })
+      .catch(console.error);
 
     const fetchColors = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/colors');
+        const response = await axiosInstance.get('/colors');
         const colorArray = Object.values(response.data).map(code => `#${code}`);
         setColors(colorArray);
-        console.log("Colors loaded:", colorArray);
       } catch (error) {
         console.error('Error fetching colors:', error);
+        if (error.response?.status === 401) {
+          window.location.href = '/login';
+        }
       }
     };
 
     fetchColors();
+    return () => websocketService.disconnect();
   }, []);
 
-  const getColorFromNumber = (number) => {
-    if (colors.length === 0) return '#ffffff';
-    return colors[number] || '';
-  };
-
-  const handleCellClick = (event, rowIndex, colIndex) => {
-    // Obtener la posición del elemento que contiene la cuadrícula
-    const gridElement = event.currentTarget.parentElement;
-    const gridRect = gridElement.getBoundingClientRect();
-    
-    // Calcular la posición relativa del clic dentro de la cuadrícula
-    const cellWidth = gridRect.width / grid[0].length;
-    const cellHeight = gridRect.height / grid.length;
-    
-    // Calcular la posición exacta del clic
-    const x = Math.floor((event.clientX - gridRect.left) / cellWidth);
-    const y = Math.floor((event.clientY - gridRect.top) / cellHeight);
-
-    setClickPosition({
-      x: event.clientX,
-      y: event.clientY
-    });
-    
-    setSelectedCell({
-      row: x,
-      col: y
-    });
-    
-    setShowColorPicker(true);
-  };
-
   const handleColorSelect = (colorIndex) => {
-    if (selectedCell && stompClient) {
-      const payload = {
-        x: selectedCell.col,
-        y: selectedCell.row,
+    if (selectedCell) {
+      websocketService.send('/app/game.sendPixel', {
+        y: selectedCell.col,
+        x: selectedCell.row,
         color: colorIndex
-      };
-      
-      console.log('Sending pixel update:', payload);
-      stompClient.send("/app/game.sendPixel", {}, JSON.stringify(payload));
+      });
     }
     setShowColorPicker(false);
     setSelectedCell(null);
+  };
+
+  const getColorFromNumber = (number) => colors[number] || '#fff';
+
+  const handleCellClick = (e, rowIndex, colIndex) => {
+    setSelectedCell({ row: rowIndex, col: colIndex });
+    setClickPosition({ x: e.clientX, y: e.clientY });
+    setShowColorPicker(true);
   };
 
   const ColorPickerMenu = () => (
@@ -132,8 +116,8 @@ const Game = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: `repeat(${grid.length || 10}, 1fr)`,
-            gridTemplateRows: `repeat(${grid[0]?.length || 10}, 1fr)`,
+            gridTemplateColumns: `repeat(${grid.length}, 1fr)`,
+            gridTemplateRows: `repeat(${grid[0]?.length}, 1fr)`,
             width: '100%',
             height: '100%',
           }}

@@ -2,6 +2,7 @@ package com.thirdimpactdev.pixel_game_server.configs.jwt;
 
 
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +17,6 @@ import java.util.Map;
 
 @Component
 public class JwtUtil {
-
-
-
 
     @Value("${secret.key}")
     private String secretKey;
@@ -35,6 +33,12 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256,secretKey )
                 .compact();
+    }
+    public Claims validateToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
     }
 
 

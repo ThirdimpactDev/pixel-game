@@ -1,22 +1,37 @@
+// src/App.jsx
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home'; // Vista principal
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import Game from './pages/Game';
-import Music from './pages/Music'; // Vista de login
+import OAuthRedirect from './components/OAuthRedirect';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
-  return (
-    <Router>
-      <Routes>
-        {/* Ruta para la página principal */}
-        <Route path="/" element={<Home />} />
-        {/* Ruta para la vista de login */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/game" element={<Game />} />
-      </Routes>
-    </Router>
-  );
+    return (
+        <Router>
+            <Routes>
+                {/* Rutas públicas */}
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                
+                {/* Rutas de autenticación OAuth */}
+                <Route path="/oauth2/redirect" element={<OAuthRedirect />} />
+                <Route path="/login/oauth2/code/google" element={<OAuthRedirect />} />
+                <Route path="/oauth/callback" element={<OAuthRedirect />} />
+                
+                {/* Ruta protegida */}
+                <Route
+                    path="/game"
+                    element={
+                        <ProtectedRoute>
+                            <Game />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
+        </Router>
+    );
 };
 
 export default App;
